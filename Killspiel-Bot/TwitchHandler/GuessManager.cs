@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TwitchLib.Client;
 
 namespace TwitchHandler
@@ -7,7 +8,7 @@ namespace TwitchHandler
     class GuessManager
     {
         private readonly Dictionary<string, int> guesses = new Dictionary<string, int>();
-        private bool running = false;
+        private bool running;
         private readonly TwitchClient twitchClient;
 
         public GuessManager(TwitchClient twitchClient)
@@ -15,19 +16,19 @@ namespace TwitchHandler
             this.twitchClient = twitchClient;
         }
 
-        public void Start(string channel, string user, string[] args) {
+        public void Start(string channel) {
             if (!running) {
                 guesses.Clear();
             }
             running = true;
             Console.WriteLine("Awaiting guesses...");
-            twitchClient.SendMessage(channel, "Tipps werden jetzt angenommen!");
+            twitchClient.SendMessage(channel, Messages.GameStarted);
         }
 
-        public void Stop(string channel, string user, string[] args) {
+        public void Stop(string channel) {
             running = false;
             Console.WriteLine("Guess window closed!");
-            twitchClient.SendMessage(channel, "Tipps werden nicht mehr angenmommen!");
+            twitchClient.SendMessage(channel, Messages.GameStopped);
         }
 
         public void Guess(string channel, string user, string[] args) {
@@ -40,41 +41,37 @@ namespace TwitchHandler
                 }
                 else
                 {
-                    twitchClient.SendMessage(channel, "Killspiel ist nicht aktiv!");
+                    twitchClient.SendMessage(channel, Messages.GameInactive);
                 }
             }
             else
             {
-                twitchClient.SendMessage(channel, "Ungültige Argumentzahl!");
+                twitchClient.SendMessage(channel, Messages.InvalidArgCount);
             }
         }
 
-        public void Resolve(string channel, string user, string[] args) {
+        public void Resolve(string channel, string[] args) {
             if (args.Length == 1 && !running)
             {
                 if (!running)
                 {
-                    int realKills = int.Parse(args[0].Trim());
-                    List<string> winners = new List<string>();
-                    foreach (var guess in guesses)
-                    {
-                        if (guess.Value == realKills)
-                        {
-                            winners.Add(guess.Key);
-                        }
-                    }
-                    twitchClient.SendMessage(channel, "Gewonnen haben: " + string.Join(", ", winners));
+                    var realKills = int.Parse(args[0].Trim());
+                    var winners = guesses
+                        .Where(guess => guess.Value == realKills)
+                        .Select(guess => guess.Key)
+                        .ToList();
+
+                    twitchClient.SendMessage(channel, Messages.Winners(winners));
                 }
                 else
                 {
-                    twitchClient.SendMessage(channel, "Killspiel läuft noch!");
+                    twitchClient.SendMessage(channel, Messages.GameActive);
                 }
             }
             else
             {
-                twitchClient.SendMessage(channel, "Ungültige Argumentzahl!");
+                twitchClient.SendMessage(channel, Messages.InvalidArgCount);
             }
         }
-
     }
 }
