@@ -1,0 +1,4 @@
+﻿All Credits for this goes to Ben Fardet.
+https://github.com/BenFradet/RiotSharp
+
+Please update your NuGet Tho, thanks.
