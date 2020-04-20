@@ -13,6 +13,15 @@ namespace LeagueHandler
 {
 	public class Handler
 	{
+		public Handler(string key)
+		{
+#if DEBUG
+			API = RiotApi.GetDevelopmentInstance(key);
+#else
+			API = RiotApi.GetInstance(key, 20, 100);
+#endif
+		}
+
 		private static readonly string VersionJson = "https://ddragon.leagueoflegends.com/api/versions.json";
 		private static string ChampionJson = "https://ddragon.leagueoflegends.com/cdn/{0}/data/en_US/champion.json";
 
@@ -22,18 +31,12 @@ namespace LeagueHandler
 
 		private static RiotApi API = default;
 
-		public async Task Initialize(string key)
+		public async Task Initialize()
 		{
 			CurrentVersion = await GetCurrentVersion();
 			ChampionJson = ChampionJson.Replace("{0}", CurrentVersion);
 
 			await GenerateChampionList();
-
-#if DEBUG
-			API = RiotApi.GetDevelopmentInstance(key);
-#else
-			API = RiotApi.GetInstance(key, 20, 100);
-#endif
 		}
 
 		public async Task<bool> CheckIfPlaysChampion(Region region, string summonerName, string championName)

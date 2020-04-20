@@ -11,100 +11,77 @@ using TwitchLib.Communication.Models;
 namespace TwitchHandler
 {
 	public class Handler
-    {
+	{
+		private static readonly string Command = "!killspiel ";
 
-        const string Command = "!killspiel ";
+		private readonly TwitchClient TwitchClient;
+		private readonly GuessManager GuessManager;
 
-        class CommandAction
-        {
-            public Predicate<UserType> Condition { get; }
-            public Action<string, string, string[]> Action { get; }
+		private readonly Dictionary<string, CommandAction> Actions;
 
+		public Handler(string username, string accessToken, string channel)
+		{
+			ConnectionCredentials credentials = new ConnectionCredentials(username, accessToken);
+			ClientOptions clientOptions = new ClientOptions
+			{
+				MessagesAllowedInPeriod = 750,
+				ThrottlingPeriod = TimeSpan.FromSeconds(30)
+			};
 
+			WebSocketClient customClient = new WebSocketClient(clientOptions);
 
-            public CommandAction(Predicate<UserType> condition, Action<string, string, string[]> action)
-            {
-                Condition = condition;
-                Action = action;
-            }
-        }
+			TwitchClient = new TwitchClient(customClient);
+			TwitchClient.Initialize(credentials, channel);
 
-        private readonly TwitchClient twitchClient;
-        private readonly GuessManager guessManager;
-        private readonly Dictionary<string, CommandAction> actions;
+			TwitchClient.OnMessageReceived += Client_OnMessageReceived;
 
-        public Handler(string username, string accessToken, string channel)
-        {
-            var credentials = new ConnectionCredentials(username, accessToken);
-            var clientOptions = new ClientOptions
-            {
-                MessagesAllowedInPeriod = 750,
-                ThrottlingPeriod = TimeSpan.FromSeconds(30)
-            };
-            var customClient = new WebSocketClient(clientOptions);
-            twitchClient = new TwitchClient(customClient);
-            twitchClient.Initialize(credentials, channel);
-            twitchClient.OnMessageReceived += Client_OnMessageReceived;
+			GuessManager = new GuessManager(TwitchClient);
 
-            guessManager = new GuessManager(twitchClient);
+			Actions = new Dictionary<string, CommandAction>
+			{
+				["start"] = new CommandAction(IsModOrAbove, (ch, _, __) => GuessManager.Start(ch)),
+				["stop"] = new CommandAction(IsModOrAbove, (ch, _, __) => GuessManager.Stop(ch)),
+				["tipp"] = new CommandAction(type => true, (ch, user, args) => GuessManager.Guess(ch, user, args)),
+				["kills"] = new CommandAction(IsModOrAbove, (ch, _, args) => GuessManager.Resolve(ch, args)),
+			};
+		}
 
-            actions = new Dictionary<string, CommandAction> {
-                ["start"] = new CommandAction(IsModOrMore, (ch, _, __) => guessManager.Start(ch)),
-                ["stop"] = new CommandAction(IsModOrMore, (ch, _, __) => guessManager.Stop(ch) ),
-                ["tipp"] = new CommandAction(type => true, guessManager.Guess ),
-                ["kills"] = new CommandAction(IsModOrMore, (ch, _, args) => guessManager.Resolve(ch, args)),
-            };
+		private static bool IsModOrAbove(UserType type)
+			=> type >= UserType.Moderator;
 
-        }
+		public void Connect()
+			=> TwitchClient.Connect();
 
-        private static bool IsModOrMore(UserType type)
-        {
-            return type >= UserType.Moderator;
-        }
+		private void HandleCommand(string channel, string username, UserType userType, string command)
+		{
+			string[] args = command.Split(" ");
 
-        public void Connect()
-        {
-            twitchClient.Connect();
-        }
+			if (args.Length == 0)
+				return;
 
-        private void HandleCommand(string channel, string username, UserType userType, string command)
-        {
-            var args = command.Split(" ");
-            if (args.Length > 0)
-            {
-                if (actions.TryGetValue(args[0], out var action))
-                {
-                    if (action.Condition(userType))
-                    {
-                        action.Action(channel, username, args.Skip(1).ToArray());
-                    }
-                    else
-                    {
-                        twitchClient.SendMessage(channel, Messages.InsufficientPermissions);
-                    }
-                }
-                else
-                {
-                    twitchClient.SendMessage(channel, Messages.InvalidCommand);
-                }
-            }
-            else
-            {
-                twitchClient.SendMessage(channel, Messages.InvalidCommand);
-            }
-        }
+			Actions.TryGetValue(args[0], out CommandAction action);
 
-        private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
-        {
-            var message = e.ChatMessage.Message;
-            var channel = e.ChatMessage.Channel;
-            var username = e.ChatMessage.Username;
-            var userType = e.ChatMessage.UserType;
-            if (message.StartsWith(Command))
-            {
-                HandleCommand(channel, username, userType, message.Substring(Command.Length));
-            }
-        }
+			if (action is null)
+				return;
 
-    }
+			if (!action.Condition(userType))
+			{
+				TwitchClient.SendMessage(channel, Messages.InsufficientPermissions);
+				return;
+			}
+
+			action.Action(channel, username, args.Skip(1).ToArray());
+		}
+
+		private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
+		{
+			string message = e.ChatMessage.Message;
+			string channel = e.ChatMessage.Channel;
+			string username = e.ChatMessage.Username;
+			UserType userType = e.ChatMessage.UserType;
+
+			if (message.StartsWith(Command))
+				HandleCommand(channel, username, userType, message.Substring(Command.Length));
+		}
+	}
 }

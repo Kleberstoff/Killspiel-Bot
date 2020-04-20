@@ -1,21 +1,25 @@
-﻿using RiotSharp.Misc;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace KillspielBot.Test
 {
 	internal class Program
 	{
-		private static string APIKey = "RGAPI-";
+		private static readonly string LeagueAPIKey = "RGAPI-";
+
+		private static readonly string TwitchUsername = "";
+		private static readonly string TwitchPassword = "";
+		private static readonly string TwitchChannel = "rvnxmango";
 
 		private static async Task Main()
 		{
-			LeagueHandler.Handler LeagueHandler = new LeagueHandler.Handler();
-			TwitchHandler.Handler TwitchHandler = new TwitchHandler.Handler();
+			LeagueHandler.Handler LeagueHandler = new LeagueHandler.Handler(LeagueAPIKey);
+			await LeagueHandler.Initialize();
 
-			await LeagueHandler.Initialize(APIKey);
+			TwitchHandler.Handler TwitchHandler = new TwitchHandler.Handler(TwitchUsername, TwitchPassword, TwitchChannel);
+			TwitchHandler.Connect();
 
-			var v = await LeagueHandler.CheckIfPlaysChampion(Region.Euw, "Kleberstoff", "Yasuo");
+			Console.ReadKey();
 		}
 	}
 }

@@ -7,5 +7,4 @@
   <ItemGroup>
     <PackageReference Include="TwitchLib.Client" Version="3.1.4" />
   </ItemGroup>
-
 </Project>
