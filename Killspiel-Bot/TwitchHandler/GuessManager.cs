@@ -44,9 +44,7 @@ namespace TwitchHandler
 				return;
 			}
 
-			int.TryParse(args[0].Trim(), out int guess);
-
-			if (guess == 0)
+            if (!int.TryParse(args[0].Trim(), out int guess))
 			{
 				TwitchClient.SendMessage(channel, Messages.InvalidArg);
 				return;
@@ -69,13 +67,16 @@ namespace TwitchHandler
 				return;
 			}
 
-			int.TryParse(args[0].Trim(), out int realKills);
-			List<string> winners = Guesses
-				.Where(guess => guess.Value == realKills)
-				.Select(guess => guess.Key)
-				.ToList();
+            if (int.TryParse(args[0].Trim(), out int realKills))
+			{
 
-			TwitchClient.SendMessage(channel, Messages.GenerateResultMessage(winners));
+				List<string> winners = Guesses
+                    .Where(guess => guess.Value == realKills)
+                    .Select(guess => guess.Key)
+                    .ToList();
+
+                TwitchClient.SendMessage(channel, Messages.GenerateResultMessage(winners));
+			}
 		}
 	}
 }

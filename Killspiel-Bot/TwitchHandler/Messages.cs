@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace TwitchHandler
 {
@@ -16,9 +15,9 @@ namespace TwitchHandler
 		public const string Winners = "Gewonnen haben: ";
 		public const string NoWinners = "Niemand hat gewonnen! rvnxmaOof";
 
-		public static string GenerateResultMessage(IEnumerable<string> winners)
+		public static string GenerateResultMessage(List<string> winners)
 		{
-			if (winners.Count() == 0)
+			if (winners.Count == 0)
 				return NoWinners;
 
 			return Winners + string.Join(", ", winners);

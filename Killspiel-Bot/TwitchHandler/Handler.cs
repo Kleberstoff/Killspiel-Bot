@@ -59,9 +59,7 @@ namespace TwitchHandler
 			if (args.Length == 0)
 				return;
 
-			Actions.TryGetValue(args[0], out CommandAction action);
-
-			if (action is null)
+            if (!Actions.TryGetValue(args[0], out CommandAction action))
 				return;
 
 			if (!action.Condition(userType))
