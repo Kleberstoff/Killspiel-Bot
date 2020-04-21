@@ -29,7 +29,7 @@ namespace LeagueHandler
 
 		private static readonly Dictionary<string, long> Champions = new Dictionary<string, long>();
 
-		private static RiotApi API = default;
+		private readonly RiotApi API;
 
 		public async Task Initialize()
 		{
