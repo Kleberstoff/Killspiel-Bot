@@ -1,82 +1,54 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using TwitchLib.Client;
 
 namespace TwitchHandler
 {
 	internal class GuessManager
 	{
-		private readonly TwitchClient TwitchClient;
 		private readonly Dictionary<string, int> Guesses = new Dictionary<string, int>();
 		private bool IsRunning { get; set; } = false;
 
-		public GuessManager(TwitchClient twitchClient)
-		{
-			TwitchClient = twitchClient;
-		}
 
-		public void Start(string channel)
+		public string Start()
 		{
 			if (!IsRunning)
 				Guesses.Clear();
 
 			IsRunning = true;
-			TwitchClient.SendMessage(channel, Messages.GameStarted);
+			return Messages.GameStarted;
 		}
 
-		public void Stop(string channel)
+		public string Stop()
 		{
 			IsRunning = false;
-			TwitchClient.SendMessage(channel, Messages.GameStopped);
+			return Messages.GameStopped;
 		}
 
-		public void Guess(string channel, string user, string[] args)
+		public string Guess(string user, int guess)
 		{
 			if (!IsRunning)
 			{
-				TwitchClient.SendMessage(channel, Messages.GameInactive);
-				return;
-			}
-
-			if (args.Length != 1)
-			{
-				TwitchClient.SendMessage(channel, Messages.InvalidArgCount);
-				return;
-			}
-
-            if (!int.TryParse(args[0].Trim(), out int guess))
-			{
-				TwitchClient.SendMessage(channel, Messages.InvalidArg);
-				return;
+				return Messages.GameInactive;
 			}
 
 			Guesses[user] = guess;
-		}
+            return null;
+        }
 
-		public void Resolve(string channel, string[] args)
+		public string Resolve(int realKills)
 		{
-			if (args.Length == 1 && !IsRunning)
+            if (IsRunning)
 			{
-				TwitchClient.SendMessage(channel, Messages.InvalidArgCount);
-				return;
+				return Messages.GameActive;
 			}
 
-			if (IsRunning)
-			{
-				TwitchClient.SendMessage(channel, Messages.GameActive);
-				return;
-			}
 
-            if (int.TryParse(args[0].Trim(), out int realKills))
-			{
+			List<string> winners = Guesses
+                .Where(guess => guess.Value == realKills)
+                .Select(guess => guess.Key)
+                .ToList();
 
-				List<string> winners = Guesses
-                    .Where(guess => guess.Value == realKills)
-                    .Select(guess => guess.Key)
-                    .ToList();
-
-                TwitchClient.SendMessage(channel, Messages.GenerateResultMessage(winners));
-			}
+            return  Messages.GenerateResultMessage(winners);
 		}
 	}
 }

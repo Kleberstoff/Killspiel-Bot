@@ -35,14 +35,14 @@ namespace TwitchHandler
 
 			TwitchClient.OnMessageReceived += Client_OnMessageReceived;
 
-			GuessManager = new GuessManager(TwitchClient);
+            GuessManager = new GuessManager();
 
 			Actions = new Dictionary<string, CommandAction>
 			{
-				["start"] = new CommandAction(IsModOrAbove, (ch, _, __) => GuessManager.Start(ch)),
-				["stop"] = new CommandAction(IsModOrAbove, (ch, _, __) => GuessManager.Stop(ch)),
-				["tipp"] = new CommandAction(type => true, (ch, user, args) => GuessManager.Guess(ch, user, args)),
-				["kills"] = new CommandAction(IsModOrAbove, (ch, _, args) => GuessManager.Resolve(ch, args)),
+				["start"] = new CommandAction(IsModOrAbove, (ch, _, __) => Start(ch)),
+				["stop"] = new CommandAction(IsModOrAbove, (ch, _, __) => Stop(ch)),
+				["tipp"] = new CommandAction(type => true, Guess),
+				["kills"] = new CommandAction(IsModOrAbove, (ch, _, args) => Resolve(ch, args)),
 			};
 		}
 
@@ -81,5 +81,46 @@ namespace TwitchHandler
 			if (message.StartsWith(Command))
 				HandleCommand(channel, username, userType, message.Substring(Command.Length));
 		}
+
+        public void Start(string channel)
+        {
+            TwitchClient.SendMessage(channel, GuessManager.Start());
+        }
+
+        public void Stop(string channel)
+        {
+            TwitchClient.SendMessage(channel, GuessManager.Stop());
+        }
+
+        public void Guess(string channel, string user, string[] args)
+        {
+
+            if (args.Length != 1)
+            {
+                TwitchClient.SendMessage(channel, Messages.InvalidArgCount);
+            }
+            else if (int.TryParse(args[0].Trim(), out int guess))
+            {
+                string message = GuessManager.Guess(user, guess);
+                if (message != null)
+                {
+                    TwitchClient.SendMessage(channel, message);
+                }
+
+            }
+        }
+
+        public void Resolve(string channel, string[] args)
+        {
+            if (args.Length != 1)
+            {
+                TwitchClient.SendMessage(channel, Messages.InvalidArgCount);
+            }
+            else if (int.TryParse(args[0].Trim(), out int realKills))
+            {
+
+                TwitchClient.SendMessage(channel, GuessManager.Resolve(realKills));
+            }
+        }
 	}
 }
