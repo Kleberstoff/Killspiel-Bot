@@ -3,10 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>Killspiel_Bot.Test</RootNamespace>
+    <RootNamespace>Killspiel.Test</RootNamespace>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\KillspielSettings\Killspiel.Settings.csproj" />
     <ProjectReference Include="..\LeagueHandler\LeagueHandler.csproj" />
     <ProjectReference Include="..\TwitchHandler\TwitchHandler.csproj" />
   </ItemGroup>

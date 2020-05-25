@@ -11,7 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RiotSharp", "RiotSharp\Riot
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{3E27D578-18E7-4E1B-A011-C83903155D5D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Killspiel-Bot.Test", "Killspiel-Bot.Test\Killspiel-Bot.Test.csproj", "{A21007FD-4FC5-4030-9F19-44AE91B1E928}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Killspiel.Test", "Killspiel-Bot.Test\Killspiel.Test.csproj", "{A21007FD-4FC5-4030-9F19-44AE91B1E928}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Killspiel.Settings", "KillspielSettings\Killspiel.Settings.csproj", "{1E8851E1-C07D-42CE-BB85-D3A44F56273A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Killspiel", "Killspiel\Killspiel.csproj", "{324EEF87-A61F-4064-9A26-1317E2507A56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +39,14 @@ Global
 		{A21007FD-4FC5-4030-9F19-44AE91B1E928}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A21007FD-4FC5-4030-9F19-44AE91B1E928}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A21007FD-4FC5-4030-9F19-44AE91B1E928}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E8851E1-C07D-42CE-BB85-D3A44F56273A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E8851E1-C07D-42CE-BB85-D3A44F56273A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E8851E1-C07D-42CE-BB85-D3A44F56273A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E8851E1-C07D-42CE-BB85-D3A44F56273A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{324EEF87-A61F-4064-9A26-1317E2507A56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{324EEF87-A61F-4064-9A26-1317E2507A56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{324EEF87-A61F-4064-9A26-1317E2507A56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{324EEF87-A61F-4064-9A26-1317E2507A56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
